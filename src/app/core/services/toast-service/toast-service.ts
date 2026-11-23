@@ -13,21 +13,24 @@ export interface Toast {
 export class ToastService {
   private toastSignal = signal<Toast[]>([]);
   toasts = this.toastSignal.asReadonly();
+
   private counter = 0;
 
-  show(message: string, type: Toast['type'] = 'info', duration = 4000) {
+  show(message: string, type: Toast['type'] = 'info', duration = 4000): void {
     const id = ++this.counter;
+
     const toast: Toast = { id, message, type, duration };
+
     this.toastSignal.update((list) => [...list, toast]);
 
     setTimeout(() => this.remove(id), duration);
   }
 
-  remove(id: number) {
-    this.toastSignal.update((list) => list.filter((t) => t.id));
+  remove(id: number): void {
+    this.toastSignal.update((list) => list.filter((toast) => toast.id !== id));
   }
 
-  clear() {
+  clear(): void {
     this.toastSignal.set([]);
   }
 }

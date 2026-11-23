@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 // TODO: adjust these two import paths to your project
 import { AdminLoginRequest } from '../../../app-model/model';
 import { AuthService } from '../../../core/services/auth-service/auth-service';
+import { ToastService } from '../../../core/services/toast-service/toast-service';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -48,6 +50,8 @@ export class Login {
     this.authService.loginAdmin(credentials).subscribe({
       next: (res) => {
         this.authService.saveSession(res, credentials.email);
+        this.toastService.show('Login successful', 'success', 6000);
+
         this.isSubmitting.set(false);
 
         // Go back to where the admin was heading, but only inside the admin area.

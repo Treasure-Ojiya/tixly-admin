@@ -40,7 +40,6 @@ export class AdminLayout implements OnInit {
       items: [
         { label: 'Events', link: '/admin/events', icon: 'fa-calendar-alt' },
         { label: 'Users', link: '/admin/users', icon: 'fa-users' },
-        { label: 'Hosts', link: '/admin/hosts', icon: 'fa-profile' },
         { label: 'Orders', link: '/admin/orders', icon: 'fa-receipt' },
       ],
     },
