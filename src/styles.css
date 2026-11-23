@@ -1,0 +1,40 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+
+@theme {
+  /* Navbar background. Text on it is always white. */
+  --color-nav: #126a97;
+
+  /* Footer background. A deeper step of the nav blue, so the page opens and
+     closes in the same family. Text on it is white, links are white/70,
+     link hover and headings accents are yellow (accent). */
+  --color-footer: #0d4566;
+
+  /* Page background. White cards sit on top of it. */
+  --color-surface: #efecd9;
+
+  /* Action: the only interactive color (buttons, links, focus, active tabs).
+     White text on brand is 3.7:1, fine for large or bold text. For small
+     text on a brand fill, use brand-dark (it is the nav blue, 5.9:1). */
+  --color-brand: #1c8cc8;
+  --color-brand-dark: #126a97; /* hover for brand fills, and links on cream/white (5:1) */
+  --color-brand-soft: #e3f1f9; /* very light tint for backgrounds and icon circles */
+
+  /* Structure: headings, body text, date tiles, outline buttons.
+     A deep navy taken from the blue, since the palette has no dark color. */
+  --color-ink: #10324a;
+
+  /* Meaning and highlight only. Never for plain decoration.
+     Yellow is the highlight on the blue nav and footer (4:1 and 6.9:1),
+     and a badge fill on light pages (text on it is ink). */
+  --color-accent: #fbd046; /* badges (Featured, Free), "pending", nav and footer highlights */
+  --color-success: #00bfa6; /* paid, available, active */
+  --color-danger: #ff3b30; /* errors, sold out */
+
+  /* Darker shades for TEXT on white, cream or tinted backgrounds.
+     The bright versions are too light to read at small sizes.
+     Pattern: bg-success/10 text-success-dark */
+  --color-accent-dark: #7a5a00;
+  --color-success-dark: #007f6e;
+  --color-danger-dark: #d92d20;
+}

@@ -1,0 +1,273 @@
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <!-- ═════════ Page header ═════════ -->
+  <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight text-ink">Overview</h1>
+      <p class="mt-1 text-sm text-ink/70">
+        Platform activity at a glance.
+      </p>
+    </div>
+
+    <p class="text-sm font-medium text-ink/70">
+      {{ today | date: "EEEE, MMMM d, y" }}
+    </p>
+  </div>
+
+  <!-- ═════════ Loading ═════════ -->
+  @if (isLoading()) {
+    <div class="space-y-6" aria-hidden="true">
+      <div class="h-56 animate-pulse rounded-2xl bg-ink/10"></div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="h-32 animate-pulse rounded-xl bg-ink/10"></div>
+        <div class="h-32 animate-pulse rounded-xl bg-ink/10"></div>
+        <div class="h-32 animate-pulse rounded-xl bg-ink/10"></div>
+      </div>
+      <div class="grid gap-6 lg:grid-cols-3">
+        <div class="h-56 animate-pulse rounded-xl bg-ink/10 lg:col-span-2"></div>
+        <div class="h-56 animate-pulse rounded-xl bg-ink/10"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ═════════ Error ═════════ -->
+  @else if (loadError()) {
+    <div
+      class="rounded-xl border border-dashed border-ink/20 bg-white px-6 py-14 text-center"
+      role="alert"
+    >
+      <div
+        class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-danger/10 text-lg font-bold text-danger-dark"
+        aria-hidden="true"
+      >
+        !
+      </div>
+      <h2 class="mt-4 text-lg font-semibold text-ink">Dashboard did not load</h2>
+      <p class="mt-1 text-sm text-ink/70">{{ loadError() }}</p>
+      <button
+        type="button"
+        (click)="load()"
+        class="mt-5 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark cursor-pointer"
+      >
+        Try again
+      </button>
+    </div>
+  }
+
+  <!-- ═════════ Loaded ═════════ -->
+  @else if (data(); as d) {
+    <div class="space-y-6">
+      <!-- Hero: revenue -->
+      <div
+        class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-nav to-footer p-6 text-white shadow-sm sm:p-8"
+      >
+        <!-- Decorative accent -->
+        <div
+          class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/5"
+          aria-hidden="true"
+        ></div>
+        <div
+          class="pointer-events-none absolute -bottom-16 right-24 h-40 w-40 rounded-full bg-white/5"
+          aria-hidden="true"
+        ></div>
+
+        <div class="relative flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70">
+              Total revenue
+            </p>
+            <p class="tabular-nums mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+              {{ d.total_revenue | currency: "NGN" : "symbol-narrow" : "1.2-2" }}
+            </p>
+            <p class="mt-2 text-sm text-white/70">
+              Across all events on the platform
+            </p>
+          </div>
+
+          <span
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent text-lg text-ink"
+            aria-hidden="true"
+          >
+            <i class="fas fa-money-bill-wave"></i>
+          </span>
+        </div>
+
+        <dl class="relative mt-8 grid gap-4 border-t border-white/15 pt-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-widest text-white/60">
+              Tickets sold
+            </dt>
+            <dd class="tabular-nums mt-1 text-2xl font-semibold">
+              {{ d.total_tickets_sold | number }}
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-widest text-white/60">
+              Average per ticket
+            </dt>
+            <dd class="tabular-nums mt-1 text-2xl font-semibold">
+              {{ avgPerTicket() | currency: "NGN" : "symbol-narrow" : "1.0-0" }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Event counts -->
+      <dl class="grid gap-4 sm:grid-cols-3">
+        <div class="rounded-xl border border-ink/10 border-t-4 border-t-brand bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <dt class="text-xs font-semibold uppercase tracking-widest text-ink/70">
+              Total events
+            </dt>
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-soft text-brand"
+              aria-hidden="true"
+            >
+              <i class="fas fa-layer-group"></i>
+            </span>
+          </div>
+          <dd class="tabular-nums mt-3 text-3xl font-semibold text-ink">
+            {{ d.total_events | number }}
+          </dd>
+          <p class="mt-1 text-xs text-ink/70">Every event ever created</p>
+        </div>
+
+        <div class="rounded-xl border border-ink/10 border-t-4 border-t-success bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <dt class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-ink/70">
+              <span class="h-2 w-2 rounded-full bg-success" aria-hidden="true"></span>
+              Active events
+            </dt>
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-lg bg-success/10 text-success-dark"
+              aria-hidden="true"
+            >
+              <i class="fas fa-bolt"></i>
+            </span>
+          </div>
+          <dd class="tabular-nums mt-3 text-3xl font-semibold text-ink">
+            {{ d.active_events | number }}
+          </dd>
+          <p class="mt-1 text-xs text-ink/70">Currently live</p>
+        </div>
+
+        <div class="rounded-xl border border-ink/10 border-t-4 border-t-accent bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <dt class="text-xs font-semibold uppercase tracking-widest text-ink/70">
+              Upcoming events
+            </dt>
+            <span
+              class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/30 text-accent-dark"
+              aria-hidden="true"
+            >
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+          </div>
+          <dd class="tabular-nums mt-3 text-3xl font-semibold text-ink">
+            {{ d.upcoming_events | number }}
+          </dd>
+          <p class="mt-1 text-xs text-ink/70">Still to happen</p>
+        </div>
+      </dl>
+
+      <!-- Breakdown + quick links -->
+      <div class="grid gap-6 lg:grid-cols-3">
+        <!-- Breakdown -->
+        <div class="rounded-xl border border-ink/10 bg-white shadow-sm lg:col-span-2">
+          <div class="border-b border-ink/10 px-5 py-4">
+            <h2 class="text-sm font-semibold text-ink">Event breakdown</h2>
+            <p class="mt-0.5 text-xs text-ink/70">Share of all events by state</p>
+          </div>
+
+          <div class="space-y-6 p-5">
+            <div>
+              <div class="mb-2 flex items-center justify-between text-sm">
+                <span class="font-medium text-ink">Active</span>
+                <span class="tabular-nums text-ink/70">
+                  {{ d.active_events | number }} of {{ d.total_events | number }}
+                  · <span class="font-semibold text-ink">{{ activeShare() }}%</span>
+                </span>
+              </div>
+              <div
+                class="h-2.5 overflow-hidden rounded-full bg-ink/10"
+                role="progressbar"
+                [attr.aria-valuenow]="activeShare()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-label="Active events share"
+              >
+                <div
+                  class="h-full rounded-full bg-success transition-all duration-500"
+                  [style.width.%]="activeShare()"
+                ></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="mb-2 flex items-center justify-between text-sm">
+                <span class="font-medium text-ink">Upcoming</span>
+                <span class="tabular-nums text-ink/70">
+                  {{ d.upcoming_events | number }} of {{ d.total_events | number }}
+                  · <span class="font-semibold text-ink">{{ upcomingShare() }}%</span>
+                </span>
+              </div>
+              <div
+                class="h-2.5 overflow-hidden rounded-full bg-ink/10"
+                role="progressbar"
+                [attr.aria-valuenow]="upcomingShare()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-label="Upcoming events share"
+              >
+                <div
+                  class="h-full rounded-full bg-brand transition-all duration-500"
+                  [style.width.%]="upcomingShare()"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="rounded-xl border border-ink/10 bg-white shadow-sm">
+          <div class="border-b border-ink/10 px-5 py-4">
+            <h2 class="text-sm font-semibold text-ink">Jump to</h2>
+          </div>
+
+          <nav class="divide-y divide-ink/5" aria-label="Quick links">
+            <a
+              routerLink="/admin/events"
+              class="flex items-center justify-between px-5 py-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft/60"
+            >
+              <span class="flex items-center gap-3">
+                <i class="fas fa-calendar-alt w-4 text-center text-brand" aria-hidden="true"></i>
+                Browse all events
+              </span>
+              <i class="fas fa-arrow-right text-xs text-ink/40" aria-hidden="true"></i>
+            </a>
+            <a
+              routerLink="/admin/orders"
+              class="flex items-center justify-between px-5 py-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft/60"
+            >
+              <span class="flex items-center gap-3">
+                <i class="fas fa-receipt w-4 text-center text-brand" aria-hidden="true"></i>
+                Review orders
+              </span>
+              <i class="fas fa-arrow-right text-xs text-ink/40" aria-hidden="true"></i>
+            </a>
+            <a
+              routerLink="/admin/finance"
+              class="flex items-center justify-between px-5 py-4 text-sm font-medium text-ink transition-colors hover:bg-brand-soft/60"
+            >
+              <span class="flex items-center gap-3">
+                <i class="fas fa-wallet w-4 text-center text-brand" aria-hidden="true"></i>
+                Payouts
+              </span>
+              <i class="fas fa-arrow-right text-xs text-ink/40" aria-hidden="true"></i>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  }
+</section>
