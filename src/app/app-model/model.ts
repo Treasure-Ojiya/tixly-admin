@@ -204,3 +204,15 @@ export interface AdminFetchHostsId {
   organization: string;
   created_at: string;
 }
+
+// and event-details to display the category of an event.
+export interface EventCategories {
+  uuid: string;
+  name: string;
+  created_at: string;
+}
+
+// Body for POST /categories/. This is what the backend expects when creating a new category. For organizers.
+export interface CreateCategory {
+  name: string;
+}

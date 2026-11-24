@@ -51,7 +51,7 @@ export class AdminLayout implements OnInit {
       label: 'System',
       items: [
         { label: 'Administrators', link: '/admin/admins', icon: 'fa-user-shield' },
-        { label: 'Settings', link: '/admin/settings', icon: 'fa-cog' },
+        // { label: 'Settings', link: '/admin/settings', icon: 'fa-cog' },
       ],
     },
   ];

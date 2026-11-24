@@ -10,7 +10,8 @@ import {
   AdminLoginResponse,
   AdminAccount,
   AdminLogoutResponse,
-  // AdminLogoutRequest,
+  EventCategories,
+  CreateCategory,
   // AdminLogoutResponse
 } from '../../../app-model/model';
 
@@ -88,4 +89,24 @@ export class AuthService {
       .post<AdminLogoutResponse>(url, { ...admin, refresh_token: refreshToken })
       .pipe(finalize(clearLocalSession));
   }
+
+  getCategories(): Observable<EventCategories[]> {
+    const url = `${this.baseUrl}/categories`;
+
+    return this.http.get<EventCategories[]>(url);
+  }
+
+  createCategory(body: CreateCategory): Observable<EventCategories> {
+    const url = `${this.baseUrl}/categories`;
+
+    return this.http.post<EventCategories>(url, body);
+  }
+
+  //   updateAdminProfile(body: AdminProfileUpdate): Observable<AdminProfileUpdate> {
+  //   return this.http.patch<AdminProfileUpdate>(`${API}/me`, body);
+  // }
+
+  // changeAdminPassword(body: AdminPasswordChange): Observable<unknown> {
+  //   return this.http.post<unknown>(`${API}/me/password`, body);
+  // }
 }
