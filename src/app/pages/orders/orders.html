@@ -3,7 +3,7 @@
   <div class="mb-8">
     <h1 class="text-2xl font-semibold tracking-tight text-ink">Orders</h1>
     <p class="mt-1 text-sm text-ink/70">
-      Every booking across the platform. Open an order to see its details or issue a refund.
+      Every booking across the platform. Open an order to see its details.
     </p>
   </div>
 
@@ -54,7 +54,7 @@
     </div>
 
     <div
-      class="col-span-2 rounded-xl border border-ink/10 border-t-4 border-t-ink/30 bg-white p-4 shadow-sm lg:col-span-1"
+      class="col-span-2 lg:col-span-1 rounded-xl border border-ink/10 border-t-4 border-t-ink/30 bg-white p-4 shadow-sm"
     >
       <dt class="text-[11px] font-semibold uppercase tracking-widest text-ink/70">Free</dt>
       <dd class="mt-2 text-2xl font-semibold tabular-nums text-ink">
@@ -392,65 +392,7 @@
             </dd>
           </div>
         </dl>
-
-        <!-- @if (refundError()) {
-          <p class="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger-dark" role="alert">
-            {{ refundError() }}
-          </p>
-        } -->
       </div>
-
-      <!-- Footer: refund -->
-      <!-- <div class="border-t border-ink/10 px-6 py-5">
-        @if (!canRefund(order)) {
-          <p class="text-sm text-ink/70">
-            @if (order.status.toLowerCase() === "refunded") {
-              This order has already been refunded.
-            } @else if (order.total <= 0) {
-              Free orders have nothing to refund.
-            } @else {
-              This order can't be refunded until it is completed.
-            }
-          </p>
-        } @else if (!confirmingRefund()) {
-          <button
-            type="button"
-            (click)="startRefund()"
-            class="w-full rounded-lg border border-danger px-4 py-2.5 text-sm font-semibold text-danger-dark transition-colors hover:bg-danger/10 cursor-pointer"
-          >
-            Refund order
-          </button>
-        } @else {
-          <div class="space-y-4" role="alertdialog" aria-labelledby="refund-title">
-            <div>
-              <h3 id="refund-title" class="text-sm font-semibold text-ink">Refund this order?</h3>
-              <p class="mt-1 text-sm text-ink/70">
-                {{ order.total | currency: "NGN" : "symbol-narrow" : "1.2-2" }} will be returned to
-                {{ order.buyer }}. This can't be undone.
-              </p>
-            </div>
-
-            <div class="flex gap-3">
-              <button
-                type="button"
-                (click)="cancelRefund()"
-                [disabled]="isRefunding()"
-                class="flex-1 rounded-lg border border-ink/20 px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-brand-soft cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                (click)="confirmRefund()"
-                [disabled]="isRefunding()"
-                class="flex-1 rounded-lg bg-danger-dark px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {{ isRefunding() ? "Refunding..." : "Yes, refund" }}
-              </button>
-            </div>
-          </div>
-        }
-      </div> -->
     </aside>
   </div>
 }

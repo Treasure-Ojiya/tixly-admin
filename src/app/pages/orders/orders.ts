@@ -1,51 +1,52 @@
-import { Component, OnInit, inject, signal, computed, HostListener } from '@angular/core';
-import { DatePipe, DecimalPipe, CurrencyPipe } from '@angular/common';
-import { AdminFetchOrders, AdminFetchOrderStats, AdminFetchOrderId } from '../../app-model/model';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { AdminFetchOrderId, AdminFetchOrderStats, AdminFetchOrders } from '../../app-model/model';
 import { AppService } from '../../../app/core/services/app-service/app-service';
 
 type SortKey = 'date_desc' | 'date_asc' | 'total_desc';
 
 interface Option {
-  id: string;
+  id: string; // 'all' or a lowercase value
   label: string;
   count: number;
 }
 
 const PAGE_SIZE = 10;
 
-const REFUNDABLE = ['completed', 'paid'];
-
 @Component({
   selector: 'app-orders',
-  imports: [DatePipe, DecimalPipe, CurrencyPipe],
+  standalone: true,
+  imports: [CurrencyPipe, DatePipe],
   templateUrl: './orders.html',
-  styleUrl: './orders.css',
 })
 export class Orders implements OnInit {
   private readonly appService = inject(AppService);
+  // private readonly toast = inject(ToastService);  // wire your toast here
 
+  // ─── Stats ───
   readonly stats = signal<AdminFetchOrderStats | null>(null);
   readonly statsLoading = signal(true);
 
+  // ─── List ───
   readonly orders = signal<AdminFetchOrders[]>([]);
   readonly isLoading = signal(true);
   readonly loadError = signal('');
 
+  // ─── Controls ───
   readonly query = signal('');
   readonly statusFilter = signal('all');
   readonly typeFilter = signal('all');
   readonly sortBy = signal<SortKey>('date_desc');
   readonly page = signal(0);
 
+  // ─── Detail drawer (read-only) ───
   readonly selected = signal<AdminFetchOrderId | null>(null);
   readonly detailLoading = signal(false);
   readonly detailError = signal('');
-  readonly confirmingRefund = signal(false);
-  readonly isRefunding = signal(false);
-  readonly refundError = signal('');
 
-  readonly statusOptions = computed(() => this.buildOptions((options) => options.status));
-  readonly typeOptions = computed(() => this.buildOptions((options) => options.type.slice(1)));
+  // ─── Derived ───
+  readonly statusOptions = computed(() => this.buildOptions((o) => o.status));
+  readonly typeOptions = computed(() => this.buildOptions((o) => o.type).slice(1)); // no "All" pill
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
@@ -53,15 +54,16 @@ export class Orders implements OnInit {
     const type = this.typeFilter();
 
     const rows = this.orders().filter(
-      (options) =>
-        (status === 'all' || options.status.toLowerCase() === type) &&
+      (o) =>
+        (status === 'all' || o.status.toLowerCase() === status) &&
+        (type === 'all' || o.type.toLowerCase() === type) &&
         (!q ||
-          options.order_id.toLowerCase().includes(q) ||
-          options.buyer.toLowerCase().includes(q) ||
-          options.event.toLowerCase().includes(q)),
+          o.order_id.toLowerCase().includes(q) ||
+          o.buyer.toLowerCase().includes(q) ||
+          o.event.toLowerCase().includes(q)),
     );
 
-    const time = (options: AdminFetchOrders) => new Date(options.date).getTime() || 0;
+    const time = (o: AdminFetchOrders) => new Date(o.date).getTime() || 0;
     switch (this.sortBy()) {
       case 'date_asc':
         return rows.sort((a, b) => time(a) - time(b));
@@ -77,12 +79,8 @@ export class Orders implements OnInit {
     const start = this.page() * PAGE_SIZE;
     return this.filtered().slice(start, start + PAGE_SIZE);
   });
-  readonly rangeStart = computed(() =>
-    this.filtered().length === 0 ? 0 : this.page() * PAGE_SIZE + 1,
-  );
-  readonly rangeEnd = computed(() =>
-    Math.min((this.page() + 1) * PAGE_SIZE, this.filtered().length),
-  );
+  readonly rangeStart = computed(() => (this.filtered().length === 0 ? 0 : this.page() * PAGE_SIZE + 1));
+  readonly rangeEnd = computed(() => Math.min((this.page() + 1) * PAGE_SIZE, this.filtered().length));
   readonly hasActiveFilters = computed(
     () => !!this.query().trim() || this.statusFilter() !== 'all' || this.typeFilter() !== 'all',
   );
@@ -94,12 +92,13 @@ export class Orders implements OnInit {
 
   loadStats(): void {
     this.statsLoading.set(true);
+
     this.appService.getOrderStats().subscribe({
-      next: (stat) => {
-        this.stats.set(stat);
+      next: (s) => {
+        this.stats.set(s);
         this.statsLoading.set(false);
       },
-      error: () => this.statsLoading.set(false),
+      error: () => this.statsLoading.set(false), // cards show a dash; the table still works
     });
   }
 
@@ -113,12 +112,14 @@ export class Orders implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.loadError.set('Could not load orders.');
+        this.loadError.set('The orders could not be loaded.');
         this.isLoading.set(false);
+        // this.toast.error(...)
       },
     });
   }
 
+  // ─── Control handlers (each returns to page 1) ───
   onQuery(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
     this.page.set(0);
@@ -148,25 +149,19 @@ export class Orders implements OnInit {
     this.page.update((p) => Math.min(this.totalPages() - 1, p + 1));
   }
 
+  // ─── Detail drawer ───
   openOrder(row: AdminFetchOrders): void {
     this.selected.set(row); // same shape: show the row instantly, then refresh from the API
     this.detailError.set('');
-    this.refundError.set('');
-    this.confirmingRefund.set(false);
     this.detailLoading.set(true);
 
-    this.appService.getOrders(row.order_id).subscribe({
+    this.appService.getOrderById(row.order_id).subscribe({
       next: (full) => {
-        const order = full[0];
-        if (order && this.selected()?.order_id === order.order_id) {
-          this.selected.set(order);
-        }
+        if (this.selected()?.order_id === full.order_id) this.selected.set(full);
         this.detailLoading.set(false);
       },
       error: () => {
-        this.detailError.set(
-          'Showing the details from the list. Latest details could not be loaded.',
-        );
+        this.detailError.set('Showing the details from the list. Latest details could not be loaded.');
         this.detailLoading.set(false);
       },
     });
@@ -175,48 +170,7 @@ export class Orders implements OnInit {
   @HostListener('document:keydown.escape')
   closeDetail(): void {
     this.selected.set(null);
-    this.confirmingRefund.set(false);
   }
-
-  // canRefund(order: { status: string; total: number }): boolean {
-  //   return REFUNDABLE.includes(order.status.toLowerCase()) && order.total > 0;
-  // }
-
-  // startRefund(): void {
-  //   this.refundError.set('');
-  //   this.confirmingRefund.set(true);
-  // }
-
-  // cancelRefund(): void {
-  //   this.confirmingRefund.set(false);
-  // }
-
-  // confirmRefund(): void {
-  //   const order = this.selected();
-  //   if (!order || this.isRefunding()) return;
-
-  //   this.isRefunding.set(true);
-  //   this.refundError.set('');
-
-  //   this.appService.refundOrder(order.order_id).subscribe({
-  //     next: (updated) => {
-  //       // Reflect the refund in the drawer and in the list
-  //       this.selected.set(updated);
-  //       this.orders.update((list) =>
-  //         list.map((o) => (o.order_id === updated.order_id ? { ...o, ...updated } : o)),
-  //       );
-  //       this.isRefunding.set(false);
-  //       this.confirmingRefund.set(false);
-  //       this.loadStats(); // counts changed
-  //       // this.toast.success('Order refunded');
-  //     },
-  //     error: () => {
-  //       this.refundError.set('The refund could not be completed. Nothing was changed.');
-  //       this.isRefunding.set(false);
-  //       // this.toast.error(...)
-  //     },
-  //   });
-  // }
 
   // ─── Display helpers ───
   shortId(id: string): string {
@@ -232,8 +186,7 @@ export class Orders implements OnInit {
     const s = status.toLowerCase();
     if (['completed', 'paid', 'success'].includes(s)) return 'bg-success/10 text-success-dark';
     if (['pending', 'processing'].includes(s)) return 'bg-accent/30 text-accent-dark';
-    if (['refunded', 'failed', 'cancelled', 'canceled'].includes(s))
-      return 'bg-danger/10 text-danger-dark';
+    if (['refunded', 'failed', 'cancelled', 'canceled'].includes(s)) return 'bg-danger/10 text-danger-dark';
     return 'bg-ink/10 text-ink/70';
   }
 

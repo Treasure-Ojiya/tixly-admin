@@ -40,13 +40,13 @@ export class AppService {
     return this.http.get<AdminFetchOrderStats>(url);
   }
 
-  getOrders(order_id?: string): Observable<AdminFetchOrders[]> {
+  getOrders(): Observable<AdminFetchOrders[]> {
     const url = `${this.baseUrl}/admin/orders`;
     return this.http.get<AdminFetchOrders[]>(url);
   }
 
   getOrderById(order_id: string): Observable<AdminFetchOrderId> {
-    const url = `${this.baseUrl}/admin/orders/{order_id}`;
+    const url = `${this.baseUrl}/admin/orders/${order_id}`;
     return this.http.get<AdminFetchOrderId>(url);
   }
 
@@ -55,10 +55,10 @@ export class AppService {
     return this.http.get<AdminFetchFinance>(url);
   }
 
-  getFinancePayout(): Observable<AdminFetchFinancePayouts> {
-    const url = `${this.baseUrl}/admin/finance/payout`;
-    return this.http.get<AdminFetchFinancePayouts>(url);
-  }
+  // getFinancePayout(): Observable<AdminFetchFinancePayouts> {
+  //   const url = `${this.baseUrl}/admin/finance/payout`;
+  //   return this.http.get<AdminFetchFinancePayouts>(url);
+  // }
 
   getUsers(users: AdminFetchUsersId): Observable<AdminFetchUsers> {
     const url = `${this.baseUrl}/admin/hosts`;
